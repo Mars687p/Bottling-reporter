@@ -1,54 +1,35 @@
-import sys
-from datetime import datetime
-from threading import Thread
+import asyncio
+import flet as ft
 
-from app.GUI import GUI
-from app.Authorization import pass_authorization
-from app.lines_information import *
-from app.logs import logger
+from app.configuration import settings
+from app.services import site_worker, monitor_lines, db_bot
+from app.bot import  dp, bot, register_commands, register_handlers
+from app.gui import Gui_app, new_process
 
-s = pass_authorization()
 
-@logger.catch(onerror=lambda _: gui.exception_handing())
-def check_line_limit(working_lines):
-    from app.Bot import send_msg
-    while True:
-        working_lines = get_working_lines(s, working_lines[0])
-        if working_lines[1]: gui.redrawing(working_lines[0])
-        log = f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+async def start(page: ft.Page):
+    try:
+        gui = Gui_app(page, monitor_lines)
+        page.add(gui)
+        await gui.show_preload()
+        
+        site_worker.gui = gui
 
-        for line in working_lines[0]:      
-            line.elements_gui[1]['text'] = line.get_alko_volume()
+        await db_bot.get_connection()
+        await site_worker.pass_authorization()
+        await monitor_lines.get_working_lines()
+        await gui.init_app()
+        asyncio.create_task(monitor_lines.processing_new_data())
 
-            if line.elements_gui[0]['text'] == line.name_line and line.elements_gui[2].get() != '': 
-                try:
-                    line.volume_to_stop = int(line.elements_gui[2].get())
-                except Exception:
-                    gui.get_msgbox()
-                    line.elements_gui[2].delete(0, END)
-
-            if line.get_alko_volume() >= line.volume_to_stop: 
-                signal(line.name_line, line.signal_active)
-                if gui.telegramID1.get(): send_msg(line, 0)
-                if gui.telegramID2.get(): send_msg(line, 1)
-
-        gui.lbl_log['text'] = log
-        gui.window.update_idletasks()
-        sleep(10)
-
-def working_lines_for_bot(): return get_working_lines(s)[0]
-def regime_lines_for_bot(): return get_regime_lines(s)
-
+        await register_handlers()
+        await register_commands()
+        await dp.start_polling(bot)
+    finally:
+        await site_worker.close_session()
+        await db_bot.pool.close()
 
 if __name__ == '__main__':
-    gui = GUI()
-    working_lines = get_working_lines(s) 
-
-    from app.Bot import start_bot
-    th_bot = Thread(target=start_bot, daemon=True)
-    th_check_limit = Thread(target=check_line_limit, args=[working_lines], daemon=True)
-    
-    th_check_limit.start()
-    th_bot.start()
-    gui.run(working_lines[0])
-    
+    if settings.config.BASIC.only_reporter:
+        new_process()
+    else:
+        ft.app(target=start)
