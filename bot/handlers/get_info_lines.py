@@ -25,10 +25,10 @@ async def get_info_working_lines(message: types.Message):
         
         if users[message.from_user.id].access['value_warning']:
             if line.volume_to_stop == '':
-                volume_to_stop = '<b>НЕТ</b>'
+                volume_to_stop = '<b>НЕТ&#10071;</b>'
             else:
                 volume_to_stop = f'<b>{line.volume_to_stop}</b> дал'
-            txt += f'Значения оповещения: {volume_to_stop}.'
+            txt += f'Значения оповещения: {volume_to_stop}'
 
         txt += '\n\n'
     if users[message.from_user.id].access['set_volume_to_stop']:

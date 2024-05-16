@@ -259,7 +259,7 @@ class MonitoringLines:
         text = ''
         for item in response:
             if item['regime'] == 5: text += f"{item['lineName']}. Режим: {item['regime']} \n"
-            else: text += f"<b>{item['lineName']}. Режим: {item['regime']}</b> \n"
+            else: text += f"<b>{item['lineName']}. Режим: {item['regime']}</b> &#10071; \n"
         return text
     
     @logger.catch
