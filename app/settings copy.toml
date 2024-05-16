@@ -1,0 +1,49 @@
+[Basic]
+regime = [
+    4,
+    7,
+    9,
+]
+night_alerts = true
+night_time_hour = 20
+counter_alerts = 25
+only_reporter = false
+
+[Reporting]
+regime_for_report = [
+    1,
+    4,
+    7,
+    9,
+]
+
+
+[User]
+url_site = ""
+login = ""
+password = ""
+
+[Audio]
+"Линия розлива №1" = ""
+"Линия розлива №2" = ""
+"Линия розлива №3" = ""
+"Спиртоприемное отделение" = ""
+"Производство дистиллятов" = ""
+"Предупреждение" = ""
+
+[Database_bot]
+host = ""
+db_name = ""
+port = "5432"
+user = ""
+password = ""
+
+[Database_info]
+host = ""
+db_name = ""
+port = "5432"
+user = ""
+password = ""
+
+[BOT]
+token = "6979225343:AAEozwO3SIIyAVs3pRpZLtiMs-pD5WLuRHE"

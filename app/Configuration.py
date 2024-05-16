@@ -1,30 +1,37 @@
-import sys   
-import configparser
-from app.logs import logger
+import os, json
+from dynaconf import Dynaconf
+from dynaconf.loaders.toml_loader import write
+from typing import Union
 
+class Settings:
+    def __init__(self) -> None:
+        self.config: Union[Dynaconf, None] = None
+        path_file = os.path.realpath(__file__)
+        dir_path = os.path.dirname(path_file)
+        self.path_file = f'{dir_path}\\settings.toml'
 
-try:
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-except Exception as e:
-    logger.exception(e)
-    sys.exit()
-
-def get_url_site():
-    return config.get('User', 'url_site')
+    def read_conf(self):
+        self.config: Dynaconf = Dynaconf(
+            settings_files=[self.path_file],
+                )
     
-def get_auth():
-    login = config.get('User', 'login')
-    password = config.get('User', 'password')
-    return login, password
+    def update_settings(self, data):
+        write(self.path_file, data)
+        self.config = Dynaconf(
+            settings_files=[self.path_file],
+                )
+        
+    def get_conection_database(self, type_db):
+        try:
+            if type_db == 'bot':
+                database_conf = self.config.Database_bot
+            elif type_db == 'info':
+                database_conf = self.config.Database_info
+        except (IndexError, AttributeError):        
+            user = os.environ.get('postgreuser')
+            user = json.loads(user)
+            database_conf['user'], database_conf['password'] = user
+        return database_conf
 
-def get_name_signal(name_line):
-    name_signal ={'Линия розлива №1':'line1', 'Линия розлива №2':'line2', 'Спиртоприемное отделение': 'spirt',
-                  'Линия розлива №3': 'line3', 'Производство дистиллятов': 'distillate'}
-    return config.get('Audio', name_signal[name_line])
-
-def get_bot_token():
-    return config.get('Bot', 'token')
-
-def get_user_id():
-    return [int(i) for i in config.get('Bot', 'userID').split(', ')]
+settings = Settings()
+settings.read_conf()
