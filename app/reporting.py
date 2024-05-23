@@ -115,6 +115,9 @@ class ReportingForm(ft.UserControl):
         self.page.update()
 
 
+    async def get_count_date(self):
+        return sum(map(lambda pr: len(pr.data_per_dates), self.time_periods.values()))
+
 
 
 
@@ -216,7 +219,8 @@ class ReportingForm(ft.UserControl):
                             
 
         wb_xlsx = ExcelWorkbook()
-        wb = await wb_xlsx.write_wb(self.time_periods)
+        count_date = await self.get_count_date()
+        wb = await wb_xlsx.write_wb(self.time_periods, count_date)
         
         await self.save_report(wb, f"Отчет об обьемах производства.xlsx")
         self.preload.open = False
