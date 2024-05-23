@@ -1,6 +1,6 @@
 import flet as ft
 
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 from decimal import Decimal
 
 from app.logs import logger
@@ -24,9 +24,21 @@ class ReportLinePerDate:
         self.total_bottles: int = 0
         self.bottles_work: int = 0
         self.bottles_overtime: int = 0
-        self.history: list = []
+        self.history: list[asyncpg.Record] = []
         self.interv_data: Optional[asyncpg.Record] = None
+        self.effective_work_time: int = 0
 
+    async def get_effective_work_time(self):
+        for bottling in self.history:
+            if bottling['regime'] != 1:
+                self.effective_work_time += (bottling['end_time'] - bottling['beg_time']).seconds
+                # Вычитаем обед
+                if bottling['beg_time'].hour < 12 and bottling['end_time'].hour >= 13:
+                    self.effective_work_time -= 3600
+        return timedelta(seconds=self.effective_work_time)
+
+
+               
 
     async def calculate_data(self):
         self.total_volume = sum([i['alko_volume'] for i in self.history])

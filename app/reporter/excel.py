@@ -82,17 +82,31 @@ class ExcelWorkbook:
         self.ws['H1'].font = self.fb11        
         self.ws['H1'].alignment = align
         self.ws['H1'].border = self.border_header
+
+        self.ws['I1'] = 'Время в работе'
+        self.ws['I1'].font = self.fb11        
+        self.ws['I1'].alignment = align
+        self.ws['I1'].border = self.border_header
+
+        self.ws['J1'] = 'Скорость, в час'
+        self.ws['J1'].font = self.fb11        
+        self.ws['J1'].alignment = align
+        self.ws['J1'].border = self.border_header
+        
         
         self.ws.merge_cells('A1:A2')
         self.ws.merge_cells('B1:D1')
         self.ws.merge_cells('E1:G1')
         self.ws.merge_cells('H1:H2')
+        self.ws.merge_cells('I1:I2')
+        self.ws.merge_cells('J1:J2')
 
-    def fill_footer(self):
+    def fill_footer(self, count_date: int):
         total = self.ws.max_row
         for col in range(1, self.ws.max_column + 1):
+            cell = self.ws.cell(row=total+1, column=col)
             if col == 1:
-                cell = self.ws.cell(row=total+1, column=col, value='ИТОГО:')
+                cell.value = 'ИТОГО:'
                 cell.font = self.fb11     
                 cell.alignment = Alignment(horizontal='right')
                 cell.border = self.border_header
@@ -101,12 +115,19 @@ class ExcelWorkbook:
             cell.font = self.fb11     
             cell.alignment = Alignment(horizontal='right')
             cell.border = self.border_header
-            if col == self.ws.max_column:
+
+            if col == 8:
+                self.ws.cell(row=total+1, column=col,
+                             value=count_date)
                 continue
-            cell = self.ws.cell(row=total+1, column=col, 
+
+            if col > 8:
+                continue
+
+            self.ws.cell(row=total+1, column=col, 
                     value=f"=Sum({get_column_letter(col)}{3}:{get_column_letter(col)}{total})")
 
-    async def write_wb(self, time_periods: Dict[int, 'TimePeriod']) -> Workbook:
+    async def write_wb(self, time_periods: Dict[int, 'TimePeriod'], count_date: int) -> Workbook:
         self.fill_header()
 
         dim_holder = DimensionHolder(worksheet=self.ws)
@@ -123,10 +144,15 @@ class ExcelWorkbook:
             for per_date in period.data_per_dates.values():
                 for item in per_date.values():
                     await item.calculate_data()
+                    effective_work_time = await item.get_effective_work_time()
+                    try:
+                        speed = item.total_bottles/(effective_work_time.seconds/3600)
+                    except ZeroDivisionError:
+                        speed = 0
                     self.ws.append([item.line_name, 
                                item.volume_work, item.volume_overtime, item.total_volume, 
                                item.bottles_work, item.bottles_overtime, item.total_bottles,
-                               item.date
+                               item.date, effective_work_time, speed
                                ])
                     
         
@@ -134,11 +160,12 @@ class ExcelWorkbook:
             if n_row > 2:
                 for n_cell, cell in enumerate(row):
                     cell.font = self.f10     
-                    # cell.alignment = align
+
                     cell.border = self.border_body
                     if n_cell == 7:
                         cell.number_format = 'DD.MM.YYYY DDD'
+                        cell.alignment = Alignment(vertical='center', horizontal='center', wrap_text=True)
         
 
-        self.fill_footer()
+        self.fill_footer(count_date)
         return self.wb
