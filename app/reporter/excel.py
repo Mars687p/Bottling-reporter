@@ -146,7 +146,7 @@ class ExcelWorkbook:
                     await item.calculate_data()
                     effective_work_time = await item.get_effective_work_time()
                     try:
-                        speed = item.total_bottles/(effective_work_time.seconds/3600)
+                        speed = item.total_bottles//(effective_work_time.seconds/3600)
                     except ZeroDivisionError:
                         speed = 0
                     self.ws.append([item.line_name, 
