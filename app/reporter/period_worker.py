@@ -60,10 +60,9 @@ class ReportLinePerDate:
         if self.interv_data != None:
             if self.interv_data['create_time'].hour > self.end_work_time.hour:
                 for row in self.history:
-                    if (row['start_time'].time() < self.end_work_time 
+                    if (row['beg_time'].time() < self.end_work_time 
                             and row['end_time'].time() > self.end_work_time):
                         logger.warning(f'Нет промежуточных данных за {self.date} - {self.line_name}')
-                        return
 
                     if row['end_time'].time() < self.end_work_time:
                         self.volume_work += row['alko_volume']
@@ -159,13 +158,16 @@ class TimePeriod:
 
         _now = date.today()
         date_now = datetime(_now.year, _now.month, _now.day, 23, 59, 59)
-        start_date = ft.DatePicker(value=date(date_now.year, date_now.month, 1), on_change=change_start_date
+        start_date = ft.DatePicker(value=date(date_now.year, date_now.month, 1), 
+                                   on_change=change_start_date
                                    )
-        end_date = ft.DatePicker(value=date_now, on_change=change_end_date
+        end_date = ft.DatePicker(value=date_now, 
+                                 on_change=change_end_date
                                  )
         
         self.start_date = start_date.value.date()
-        self.end_date = datetime(_now.year, _now.month, _now.day+1)
+        self.end_date = datetime(end_date.value.year, end_date.value.month,
+                               end_date.value.day, 23, 59, 59)
 
         self.page.overlay.append(start_date)
         self.page.overlay.append(end_date)

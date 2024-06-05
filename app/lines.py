@@ -232,10 +232,7 @@ class Line:
             time_sec = (current_data['create_time'] - time_interval['create_time']).seconds + 1
             if time_sec >= period:
                 bottles = current_data['bottle_count'] - time_interval['bottle_count']
-                self.average_speed_10m = int(bottles/time_sec*3600)
-                
-                self.txt_speed_line.value = f"{self.average_speed_10m} в час."
-                self.gui.update()
+                self.average_speed_10m = int(bottles/time_sec*3600)                
                 break
 
 
@@ -466,6 +463,13 @@ class MonitoringLines:
                     line.interv_data.pop(0)
                 await line.get_speed_line_per_10m(period)
                 await line.get_speed_line_per_h()
+                total_speed = await line.get_speed_line_total_now()
+
+                line.txt_speed_line.value = f"{line.average_speed_10m} в час."
+                line.txt_speed_line.tooltip = \
+                f"За час: {line.average_speed_h} в час\nВсего: {total_speed} в час" 
+                
+                self.gui.update()
             
             await asyncio.sleep(period)
 
