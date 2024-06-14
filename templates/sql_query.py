@@ -33,5 +33,11 @@ select_not_closed_regimes = """SELECT * FROM history_regimes WHERE beg_time
                                 AND end_time IS NULL
                                 ORDER BY beg_time"""
 
+select_history_regimes = """SELECT hr.line_id, hr.product_name, hr.regime, hr.bottles_count, hr.alko_volume, 
+                            hr.beg_time, hr.end_time,  ln.line_name
+                            FROM history_regimes as hr 
+                            JOIN lines as ln ON hr.line_id = ln.point_control
+                            ORDER BY id DESC LIMIT 200"""
+
 # PARAMETERS
 not_consider_flash = "regime != 1"

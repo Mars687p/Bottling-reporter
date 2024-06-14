@@ -9,6 +9,7 @@ from pygame import mixer
 
 from app.database import Database
 from app.reporting import ReportingForm
+from app.history_regimes import HistoryForm
 from app.lines import Line, MonitoringLines
 from app.configuration import settings
 from bot.handlers.send_msg import send_calling_supervisor
@@ -55,6 +56,9 @@ class Gui_app(ft.Row):
         self.but_night_al = ft.IconButton(ft.icons.NIGHTLIGHT_OUTLINED, on_click=self.on_off_night_alerts)
         self.but_report = ft.IconButton(ft.icons.REAL_ESTATE_AGENT_ROUNDED, on_click=self.open_reporter,
                                         tooltip='Отчет по розливу')
+        self.but_history = ft.IconButton(ft.icons.HISTORY_TOGGLE_OFF_SHARP, 
+                                         on_click=self.open_history_regimes,
+                                         tooltip='История режимов')
         self.but_call_visor = ft.IconButton(ft.icons.SOS_OUTLINED, on_click=self.call_visor,
                                         tooltip='SOS')
         appbar = ft.AppBar(
@@ -62,7 +66,8 @@ class Gui_app(ft.Row):
                         color=ft.colors.WHITE,
                         bgcolor=ft.colors.BLACK,
                         leading=self.but_upd_reg, 
-                        actions=[self.but_call_visor,
+                        actions=[self.but_history,
+                                 self.but_call_visor,
                                  self.but_report,
                                  self.but_night_al,
                                 ]            
@@ -233,23 +238,46 @@ class Gui_app(ft.Row):
 
 
     """--------------------------------------------------------------------------------"""
-    """-------------------------------------REPORT-------------------------------------"""
+    """---------------------------------NEW WINDOW-------------------------------------"""
     """--------------------------------------------------------------------------------"""
     
 
     async def open_reporter(self, e: ft.ControlEvent):
-        reporter_module = Process(target=new_process, args=[])
+        reporter_module = Process(target=new_process_report, args=[])
         reporter_module.start()
+    
+    async def open_history_regimes(self, e: ft.ControlEvent):
+        history_module = Process(target=new_process_history_regimes, args=[])
+        history_module.start()
 
 
 
         
-def new_process():
+def new_process_report():
     async def window(page: ft.Page):
         try:
             db = Database('bottling_reporter_bot', 'bot')
             await db.get_connection()
             app = ReportingForm(page, db)
+            page.add(app)
+            await app.show_preload()
+            await app.init_app()
+
+            while True:
+                await asyncio.sleep(3600)
+        finally:
+            await db.pool.close()
+            print('db close')
+
+
+    ft.app(target=window)
+
+def new_process_history_regimes():
+    async def window(page: ft.Page):
+        try:
+            db = Database('bottling_reporter_bot', 'bot')
+            await db.get_connection()
+            app = HistoryForm(page, db)
             page.add(app)
             await app.show_preload()
             await app.init_app()
