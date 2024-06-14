@@ -4,7 +4,7 @@ import flet as ft
 from app.configuration import settings
 from app.services import site_worker, monitor_lines, db_bot
 from app.bot import  dp, bot, register_commands, register_handlers
-from app.gui import Gui_app, new_process
+from app.gui import Gui_app, new_process_report
 
 
 async def start(page: ft.Page):
@@ -30,6 +30,6 @@ async def start(page: ft.Page):
 
 if __name__ == '__main__':
     if settings.config.BASIC.only_reporter:
-        new_process()
+        new_process_report()
     else:
         ft.app(target=start)
