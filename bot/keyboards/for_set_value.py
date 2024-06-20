@@ -1,9 +1,9 @@
-from aiogram import types
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.filters.callback_data import CallbackData
-
-
 from typing import TYPE_CHECKING, Dict, Optional
+
+from aiogram import types
+from aiogram.filters.callback_data import CallbackData
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 if TYPE_CHECKING:
     from app.lines import Line
 
@@ -17,8 +17,10 @@ async def kb_pick_line(lines: Dict[str, 'Line']) -> types.InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for line in lines.values():
         builder.button(
-            text=line.name_line, callback_data=SetValueCallbackFactory(action="set", value=line.name_line)
+            text=line.name_line,
+            callback_data=SetValueCallbackFactory(
+                            action="set",
+                            value=line.name_line)
         )
     builder.adjust(1)
     return builder.as_markup()
-     

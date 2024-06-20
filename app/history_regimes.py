@@ -1,31 +1,32 @@
-import asyncio
+from typing import TYPE_CHECKING, Optional
+
 import flet as ft
-
-
-from datetime import datetime
 
 from app.logs import logger
 from templates import sql_query
-from typing import TYPE_CHECKING, Optional
+
 if TYPE_CHECKING:
     from app.database import Database, asyncpg
 
 
 class HistoryForm(ft.UserControl):
-    def __init__(self, page, db):
+    def __init__(self, page: ft.Page, db: 'Database') -> None:
         super().__init__()
         self.page = page
-        self.db: Database = db
-        self.preload = ft.AlertDialog(modal=True,
-                    content=ft.Column(
-                    [ft.ProgressRing(), ft.Text('Пожалуйста подождите...')],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    height=150, 
-                    ))
+        self.db = db
+        self.preload = ft.AlertDialog(
+                        modal=True,
+                        content=ft.Column(
+                                [ft.ProgressRing(),
+                                    ft.Text('Пожалуйста подождите...')],
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                height=150,
+                                )
+                    )
         self.history: list[asyncpg.Record] = []
 
-    def build(self):
+    def build(self) -> None:
         self.page.window_min_width = 1280
         self.page.window_min_height = 600
         self.page.window_width = 1440
@@ -39,27 +40,30 @@ class HistoryForm(ft.UserControl):
                     )
         self.page.bgcolor = '#FAFAD2'
 
-        return ft.Container(ft.Text('История режимов', text_align=ft.TextAlign.CENTER, size=30, 
-                                     weight=ft.FontWeight.BOLD),
-                                     alignment=ft.alignment.center)
+        return ft.Container(ft.Text('История режимов',
+                                    text_align=ft.TextAlign.CENTER,
+                                    size=30,
+                                    weight=ft.FontWeight.BOLD),
+                            alignment=ft.alignment.center)
 
-    async def init_app(self):
+    async def init_app(self) -> None:
         self.content = ft.Row(alignment=ft.MainAxisAlignment.CENTER, expand=True, wrap=True)
         self.preload.open = False
         await self.show_history_form()
 
         self.page.update()
 
-    async def show_preload(self):
+    async def show_preload(self) -> None:
         self.page.dialog = self.preload
         self.preload.open = True
         self.page.update()
-    
-    async def show_flash(self, e: Optional[ft.ControlEvent] = None): 
+
+    @logger.catch
+    async def show_flash(self, e: Optional[ft.ControlEvent] = None) -> None:
         await self.get_table_history()
         self.page.update()
-    
-    async def get_table_history(self):
+
+    async def get_table_history(self) -> None:
         self.table_history.rows.clear()
 
         if not self.chck_flash.value:
@@ -69,10 +73,13 @@ class HistoryForm(ft.UserControl):
 
         for index, regime in enumerate(history, 1):
             if not index % 2:
-                color_row = {ft.MaterialState.DEFAULT: ft.colors.with_opacity(0.7, ft.colors.YELLOW_50),}
-            else: 
-                color_row = {ft.MaterialState.DEFAULT: ft.colors.WHITE70,}
-            
+                color_row = {
+                    ft.MaterialState.DEFAULT: ft.colors.with_opacity(0.7,
+                                                                     ft.colors.YELLOW_50)
+                            }
+            else:
+                color_row = {ft.MaterialState.DEFAULT: ft.colors.WHITE70}
+
             try:
                 beg_time = f"{regime['beg_time'].date()} {regime['beg_time'].time()}"
                 end_time = f"{regime['end_time'].date()} {regime['end_time'].time()}"
@@ -80,24 +87,40 @@ class HistoryForm(ft.UserControl):
                 beg_time = ''
                 end_time = ''
 
-            self.table_history.rows.append(ft.DataRow(cells=
-                                        [
-                                            ft.DataCell(ft.Text(regime['line_id'], selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(regime['line_name'], selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(regime['product_name'], selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(regime['regime'], selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(regime['alko_volume'], selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(regime['bottles_count'], selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(beg_time, selectable=True, size=11)),
-                                            ft.DataCell(ft.Text(end_time, selectable=True, size=11)),
+            self.table_history.rows.append(ft.DataRow(
+                                    cells=[
+                                        ft.DataCell(ft.Text(regime['line_id'],
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(regime['line_name'],
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(regime['product_name'],
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(regime['regime'],
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(regime['alko_volume'],
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(regime['bottles_count'],
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(beg_time,
+                                                            selectable=True,
+                                                            size=11)),
+                                        ft.DataCell(ft.Text(end_time,
+                                                            selectable=True,
+                                                            size=11)),
                                         ],
                                     color=color_row
                                 ))
 
-
-    async def show_history_form(self):
+    @logger.catch
+    async def show_history_form(self) -> None:
         async with self.db.pool.acquire() as con:
-            con: asyncpg.Connection
+            con: asyncpg.Connection  # type: ignore
             self.history = await con.fetch(sql_query.select_history_regimes)
 
         self.table_history = ft.DataTable(columns=[
@@ -110,24 +133,26 @@ class HistoryForm(ft.UserControl):
                                     ft.DataColumn(ft.Text('Дата начала')),
                                     ft.DataColumn(ft.Text('Дата окончания')),
                                     ],
-                                        rows=[], 
-                                        heading_row_color=ft.colors.BLACK12, 
+                                        rows=[],
+                                        heading_row_color=ft.colors.BLACK12,
                                         horizontal_lines=ft.border.BorderSide(1, "black"),
                                         vertical_lines=ft.border.BorderSide(1, "black"),
                                         show_bottom_border=True,
                                         bgcolor=ft.colors.WHITE, )
 
-        self.chck_flash = ft.Checkbox('Показывать промывку', value=False, on_change=self.show_flash)    
-        
+        self.chck_flash = ft.Checkbox('Показывать промывку',
+                                      value=False,
+                                      on_change=self.show_flash)
+
         await self.get_table_history()
         self.content = ft.Column(
                             [
-                            self.chck_flash, 
-                            ft.Container(
-                                ft.ListView([self.table_history]), 
-                                height=550, bgcolor=ft.colors.WHITE,
-                                border=ft.border.all(4, "black")
-                                )
+                                self.chck_flash,
+                                ft.Container(
+                                    ft.ListView([self.table_history]),
+                                    height=550, bgcolor=ft.colors.WHITE,
+                                    border=ft.border.all(4, "black")
+                                    )
                             ]
         )
 
