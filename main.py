@@ -1,18 +1,18 @@
 import asyncio
+
 import flet as ft
 
+from app.bot import bot, dp, register_commands, register_handlers
 from app.configuration import settings
-from app.services import site_worker, monitor_lines, db_bot
-from app.bot import  dp, bot, register_commands, register_handlers
 from app.gui import Gui_app, new_process_report
+from app.services import db_bot, monitor_lines, site_worker
 
 
-async def start(page: ft.Page):
+async def start(page: ft.Page) -> None:
     try:
         gui = Gui_app(page, monitor_lines)
         page.add(gui)
         await gui.show_preload()
-        
         site_worker.gui = gui
 
         await db_bot.get_connection()
