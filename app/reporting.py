@@ -69,6 +69,28 @@ class ReportingForm(ft.UserControl):
         self.preload.open = True
         self.page.update()
 
+    async def show_banner(self, msg: str, banner_type: str) -> None:
+        # banner_type = err or info
+        async def close_banner(e):
+            self.page.banner.open = False
+            self.page.update()
+
+        self.page.banner = ft.Banner(
+            leading=ft.Icon(ft.icons.INFO_OUTLINE_ROUNDED, color=ft.colors.BLUE, size=36),
+            content=ft.Text(msg, size=28, color=ft.colors.BLACK),
+            actions=[
+                ft.ElevatedButton("Закрыть", on_click=close_banner),
+            ],
+        )
+
+        if banner_type == 'err':
+            self.page.banner.bgcolor = ft.colors.RED
+        elif banner_type == 'info':
+            self.page.banner.bgcolor = ft.colors.YELLOW_100
+
+        self.page.banner.open = True
+        self.page.update()
+
     @logger.catch
     async def show_pick_line(self) -> ft.Container:
         self.lines = await self.db.select_sql(sql_query.select_lines)
@@ -246,9 +268,11 @@ class ReportingForm(ft.UserControl):
                                             period.end_date,
                                                     )
                 if len(not_closed_regime) > 0:
-                    period.calculate_err.append(
-                                f'Не закрытые режимы в период с {period.start_date}'
+                    text_warning = (
+                                f'Не закрытые режимы в период с {period.start_date} '
                                 f'по {period.end_date}')
+                    await self.show_banner(text_warning, 'err')
+                    logger.warning(f"{text_warning}\n{not_closed_regime}")
                 db_data = await con.fetch(
                                         select_regimes,
                                         period.start_date,
@@ -272,15 +296,7 @@ class ReportingForm(ft.UserControl):
                     return
                 wb.save(file_dialog.result.path)
             except PermissionError:
-                bar = ft.SnackBar(
-                            content=ft.Text('Файл занят другим процессом',
-                                            color=ft.colors.BLACK,
-                                            size=36),
-                            show_close_icon=True,
-                            close_icon_color=ft.colors.RED, duration=10000,
-                            bgcolor=ft.colors.YELLOW)
-                self.page.snack_bar = bar
-                bar.open = True
+                await self.show_banner('Файл занят другим процессом', 'err')
                 return
 
         file_dialog = ft.FilePicker(on_result=saver)

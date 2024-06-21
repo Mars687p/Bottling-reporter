@@ -1,13 +1,14 @@
 insert_history_regime = """INSERT INTO history_regimes (
-                            line_id, product_name, regime,  
+                            line_id, product_name, regime,
                             over_alko_volume, over_bottles_counts, beg_time)
                                         VALUES ($1, $2, $3, $4, $5, $6)"""
 
-add_end_time_regime = """UPDATE history_regimes SET bottles_count=$1, alko_volume=$2, end_time=$3 
+add_end_time_regime = """UPDATE history_regimes SET bottles_count=$1, alko_volume=$2, end_time=$3
                                                 WHERE line_id=$4 and beg_time=$5"""
 
 
-insert_intervening_data = """INSERT INTO intervening_data_lines (line_id, over_alko_volume, over_bottles_counts)
+insert_intervening_data = """INSERT INTO intervening_data_lines (line_id, over_alko_volume,
+                                                                over_bottles_counts)
                                                         VALUES ($1, $2, $3)"""
 
 select_users_bot = "SELECT * FROM users"
@@ -16,14 +17,14 @@ select_lines = """SELECT * FROM lines"""
 
 
 select_regimes_per_period = """SELECT * FROM history_regimes WHERE beg_time
-                                                BETWEEN $1 AND $2 
+                                                BETWEEN $1 AND $2
                                                 AND line_id = Any($3::BIGINT[])
                                                 AND end_time IS NOT NULL
                                 ORDER BY beg_time"""
 
 select_regime_line = """SELECT * FROM history_regimes WHERE beg_time = $1 AND line_id = $2"""
 
-select_interv_data = """SELECT * FROM intervening_data_lines WHERE line_id = $1 
+select_interv_data = """SELECT * FROM intervening_data_lines WHERE line_id = $1
                                                         AND create_time >= $2
                                                         AND create_time < $3
                                             ORDER BY create_time"""
@@ -33,9 +34,10 @@ select_not_closed_regimes = """SELECT * FROM history_regimes WHERE beg_time
                                 AND end_time IS NULL
                                 ORDER BY beg_time"""
 
-select_history_regimes = """SELECT hr.line_id, hr.product_name, hr.regime, hr.bottles_count, hr.alko_volume, 
+select_history_regimes = """SELECT hr.line_id, hr.product_name, hr.regime,
+                            hr.bottles_count, hr.alko_volume,
                             hr.beg_time, hr.end_time,  ln.line_name
-                            FROM history_regimes as hr 
+                            FROM history_regimes as hr
                             JOIN lines as ln ON hr.line_id = ln.point_control
                             ORDER BY id DESC LIMIT 200"""
 
