@@ -541,7 +541,7 @@ class MonitoringLines:
                     self.working_lines[item['lineName']].beg_time !=
                         datetime.strptime(item['beg_time'],
                                           '%Y-%m-%dT%H:%M:%SZ')):
-                    await self._insert_line(item)
+                    await self._del_line(item)
 
     @logger.catch
     async def check_line_limit(self) -> None:

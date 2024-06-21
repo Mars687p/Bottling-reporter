@@ -30,7 +30,6 @@ class TimePeriod:
                                  date_now.day, 23, 59, 59)
 
         self.data_per_dates: Dict[date, Dict[int, ReportLinePerDate]] = {}
-        self.calculate_err: list[str] = []
 
     async def get_gui_row(self, func_del_work_time: Callable) -> ft.Row:
         txt_work_time = ft.Text('Рабочее время:',
