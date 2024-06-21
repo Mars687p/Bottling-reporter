@@ -446,6 +446,7 @@ class MonitoringLines:
     async def _input_volume_to_stop(self, line: Line) -> float | Literal['']:
         input_value = line.txtf_volume.value
         if input_value == '':
+            line.volume_to_stop = ''
             return ''
         try:
             input_value = float(line.txtf_volume.value)
