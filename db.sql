@@ -50,5 +50,12 @@ tg_access = '{"warning_bottling": 1, "end_bottling": 1, "night_warning": 1, "val
               "set_volume_to_stop": 1}'
 */
 
+
+INSERT INTO users (tg_id, first_name, last_name, tg_access)
+            VALUES (0, 'ИМЯ', 'ФАМИЛИЯ', '{"warning_bottling": 1, "end_bottling": 1, "night_warning": 1, "value_warning": 1,
+              "set_volume_to_stop": 1}');
+
 CREATE USER bottling_reporter_bot WITH PASSWORD 'PASSWORD';
 GRANT ALL PRIVILEGES ON SCHEMA public to bottling_reporter_bot;
+/* For info db */
+GRANT SELECT  ON shipments, transports, products, cart_products, clients to bottling_reporter_bot;
