@@ -215,9 +215,8 @@ class Line:
                                 bgcolor='#F0FFF0',
                                 border=ft.border.all(2, ft.colors.BLACK),
                                 border_radius=ft.border_radius.all(10),
-                                padding=0,
+                                padding=ft.Padding(0, 0, 0, 10),
                                 width=300,
-                                height=410,
                                 data=self.name_line
                             )
         self.gui_elements = content

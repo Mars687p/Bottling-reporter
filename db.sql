@@ -51,19 +51,11 @@ tg_access = '{"warning_bottling": 1, "end_bottling": 1, "night_warning": 1, "val
 */
 
 
-INSERT INTO users (tg_id, first_name, last_name, tg_access) 
-            VALUES (476048675, 'Владимир', 'Чуркин', '{"warning_bottling": 1, "end_bottling": 1, "night_warning": 1, "value_warning": 1,
+INSERT INTO users (tg_id, first_name, last_name, tg_access)
+            VALUES (0, 'ИМЯ', 'ФАМИЛИЯ', '{"warning_bottling": 1, "end_bottling": 1, "night_warning": 1, "value_warning": 1,
               "set_volume_to_stop": 1}');
-
-INSERT INTO users (tg_id, first_name, last_name, tg_access) 
-            VALUES (409952582, 'Сергей', 'Чуркин', '{"warning_bottling": 1, "end_bottling": 1, "night_warning": 1, "value_warning": 1,
-              "set_volume_to_stop": 1}');
-
-INSERT INTO users (tg_id, first_name, last_name, tg_access) 
-            VALUES (1128438137, 'Диана', 'Дебольская', '{"warning_bottling": 0, "end_bottling": 1, "night_warning": 0, "value_warning": 1,
-              "set_volume_to_stop": 0}');
-
 
 CREATE USER bottling_reporter_bot WITH PASSWORD 'Def123321!';
 GRANT ALL PRIVILEGES ON SCHEMA public to bottling_reporter_bot;
-
+/* For info db */
+GRANT SELECT  ON shipments, transports, products, cart_products, clients to bottling_reporter_bot;

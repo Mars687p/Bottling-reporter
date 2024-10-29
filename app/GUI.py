@@ -237,9 +237,16 @@ class Gui_app(ft.Row):
         window_width = len(self.content.controls) * width
 
         self.page.window_min_width = width
-
         self.page.window_width = window_width
-        self.page.window_height = 550
+
+        line_name: str | None = None
+        for name in self.monitor_lines.working_lines.keys():
+            line_name = name
+            break
+        if line_name is not None:
+            len_tg_swtich = len(
+                self.monitor_lines.working_lines[line_name].switch_tg_notify) * 40
+            self.page.window_height = 460 + len_tg_swtich
 
     """--------------------------------------------------------------------------------"""
     """---------------------------------NEW WINDOW-------------------------------------"""

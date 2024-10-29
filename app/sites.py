@@ -33,7 +33,7 @@ class SessionSite:
                 if is_err:
                     await self.gui.show_banner('Подключение восстановлено', 'info')
                 return response
-            except (TimeoutError, OSError, aiohttp.client_exceptions.ServerDisconnectedError,
+            except (OSError, aiohttp.client_exceptions.ServerDisconnectedError,
                     asyncio.TimeoutError):
                 if is_err is False:
                     is_err = True
