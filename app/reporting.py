@@ -242,8 +242,8 @@ class ReportingForm(ft.UserControl):
                     d_t_end = datetime(
                                 row['end_time'].year,
                                 row['end_time'].month,
-                                row['end_time'].day+1,
-                                0, 0)
+                                row['end_time'].day,
+                                23, 59, 59)
 
                     row = await con.fetchrow(sql_query.select_interv_data,
                                              row['line_id'],
