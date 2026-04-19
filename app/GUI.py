@@ -11,7 +11,9 @@ from app.database import Database
 from app.history_regimes import HistoryForm
 from app.lines import Line, MonitoringLines
 from app.reporting import ReportingForm
+from app.services import close_app, stop_event
 from bot.handlers.send_msg import send_calling_supervisor
+from bot.services.close_bot import close_bot_connection
 
 
 class Gui_app(ft.Row):
@@ -49,6 +51,7 @@ class Gui_app(ft.Row):
                                      alignment=ft.alignment.center)
 
     def build(self) -> ft.Row:
+        self.page.window_prevent_close = True
         self.page.title = 'Bottling reporter'
         self.page.window_height = 200
         self.page.window_width = 400
@@ -107,8 +110,10 @@ class Gui_app(ft.Row):
         self.page.update()
 
     async def call_visor(self, e: ft.ControlEvent) -> None:
-        await send_calling_supervisor(f"{self.monitor_lines.users[1128438137].name}",
-                                      1128438137)
+        await send_calling_supervisor(
+            f"{self.monitor_lines.users[settings.config.BASIC.visor_tg_id].name}",
+            settings.config.BASIC.visor_tg_id
+        )
 
     async def on_off_night_alerts(self, e: ft.ControlEvent) -> None:
         new_toml = toml.load(settings.path_file)
@@ -125,6 +130,13 @@ class Gui_app(ft.Row):
             await asyncio.sleep(0.1)
             await self.get_size_window()
             self.page.update()
+        elif e.data == "close":
+            try:
+                stop_event.set()
+                await close_bot_connection()
+                await close_app()
+            finally:
+                self.page.window_destroy()
 
     async def get_el_night_alerts(self) -> None:
         if settings.config.BASIC.night_alerts:

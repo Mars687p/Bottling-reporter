@@ -8,6 +8,10 @@ night_alerts = true
 night_time_hour = 20
 counter_alerts = 25
 only_reporter = false
+visor_tg_id = 0
+
+is_activate_bot = true
+retry_bot_timeout_sec = 10
 
 [Reporting]
 regime_for_report = [

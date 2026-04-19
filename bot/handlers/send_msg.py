@@ -25,6 +25,6 @@ async def send_night_warning(item: dict, tg_id: int) -> None:
 
 
 async def send_calling_supervisor(fio: str, tg_id:  int) -> None:
-    text = (f"Уважаемая {fio}!\n",
+    text = (f"Уважаемая {fio}!\n"
             "Придите к нам пожалуйста, когда у вас будет свободная минутка&#128522;")
     await bot.send_message(tg_id, text)

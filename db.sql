@@ -56,6 +56,6 @@ INSERT INTO users (tg_id, first_name, last_name, tg_access)
               "set_volume_to_stop": 1}');
 
 CREATE USER bottling_reporter_bot WITH PASSWORD 'PASSWORD';
-GRANT ALL PRIVILEGES ON SCHEMA public to bottling_reporter_bot;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bottling_reporter_bot;
 /* For info db */
 GRANT SELECT  ON shipments, transports, products, cart_products, clients to bottling_reporter_bot;

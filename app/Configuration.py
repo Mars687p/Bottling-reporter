@@ -10,7 +10,7 @@ class Settings:
     def __init__(self) -> None:
         path_file = os.path.realpath(__file__)
         dir_path = os.path.dirname(path_file)
-        self.path_file = f'{dir_path}\\settings.toml'
+        self.path_file = f'{dir_path}/settings.toml'
 
     def read_conf(self) -> None:
         self.config = Dynaconf(

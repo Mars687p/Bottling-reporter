@@ -14,3 +14,9 @@ loop.run_until_complete(db_bot.get_connection())
 users = loop.run_until_complete(get_users(db_bot))
 site_worker = SessionSite()
 monitor_lines = MonitoringLines(site_worker, users, db_bot)
+stop_event = asyncio.Event()
+
+
+async def close_app() -> None:
+    await site_worker.close_session()
+    await db_bot.pool.close()
